@@ -2,6 +2,7 @@ package com.example.hibernate.reactive.demo.repository.impl;
 
 import com.example.hibernate.reactive.demo.model.User;
 import com.example.hibernate.reactive.demo.repository.interfaces.UserRepository;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 public class UserRepoImpl implements UserRepository {
@@ -27,13 +29,19 @@ public class UserRepoImpl implements UserRepository {
             .chain(session::flush)
             .replaceWith(user))
         .convert()
-        .with(UniReactorConverters.toMono());
+            .with(getUniMonoFunction());
+  }
+
+  private static <I> Function<Uni<I>, Mono<I>> getUniMonoFunction() {
+    return userUni -> Mono.fromCompletionStage(userUni.convert().toCompletableFuture());
   }
 
   @Override
   public Flux<User> getUsers() {
-    return monoToFluxUsingFlatMapMany(sessionFactory.withSession(session -> session.createNativeQuery("select * from task.user" , User.class)
-        .getResultList()).convert().with(UniReactorConverters.toMono()));
+    return monoToFluxUsingFlatMapMany(
+            sessionFactory.withSession(session -> session.createQuery("from User u" , User.class)
+        .getResultList())
+                    .convert().with(getUniMonoFunction()));
   }
 
   private <T> Flux<T> monoToFluxUsingFlatMapMany(Mono<List<T>> monoList) {

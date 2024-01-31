@@ -1,6 +1,6 @@
 package com.example.hibernate.reactive.demo.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,26 +13,27 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "tasks")
 public class Task {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String name;
+    private String name;
 
-  @ManyToOne(targetEntity = User.class)
-  private User user;
+    @ManyToOne(targetEntity = User.class)
+    private User user;
 
-  @Column(columnDefinition = "timestamp")
-  private ZonedDateTime createdTime;
+    @Column(columnDefinition = "timestamp")
+    private ZonedDateTime createdTime;
 
-  @Column(columnDefinition = "text")
-  private String description;
+    @Column(columnDefinition = "text")
+    private String description;
 
-  @Column(columnDefinition = "timestamp")
-  private ZonedDateTime completeTime;
+    @Column(columnDefinition = "timestamp")
+    private ZonedDateTime completeTime;
 
-  @Column(columnDefinition = "timestamp")
-  private ZonedDateTime estimatedEndTime;
+    @Column(columnDefinition = "timestamp")
+    private ZonedDateTime estimatedEndTime;
 }
